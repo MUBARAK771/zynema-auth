@@ -294,6 +294,45 @@ section h2 {
     max-height: 320px
 }
 
+.watch-features {
+    border-bottom: 1px solid var(--line);
+    background: radial-gradient(700px 280px at 10% 50%, #e5171f12, transparent)
+}
+
+.watch-features-label {
+    margin-bottom: .8rem;
+    color: var(--accent);
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase
+}
+
+.watch-features h2 {
+    margin-bottom: 1rem
+}
+
+.watch-features-intro {
+    max-width: 58ch;
+    margin-bottom: 2rem;
+    color: var(--mute);
+    font-size: 1.1rem
+}
+
+.watch-feature-card {
+    position: relative;
+    overflow: hidden
+}
+
+.watch-feature-number {
+    display: block;
+    margin-bottom: 1.2rem;
+    color: var(--accent);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800
+}
+
 .grid3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
