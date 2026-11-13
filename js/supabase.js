@@ -1,7 +1,7 @@
 import { createBrowserClient } from 'https://esm.sh/@supabase/ssr@0.5.2';
 import { CONFIG } from './config.js';
 
-// Cookie-based storage (not localStorage) so the Next.js app on the same parent domain can read the session.
+// Each hostname keeps its own session unless both sites use a shared custom domain.
 export const supabase = createBrowserClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
   auth: { flowType: 'pkce', detectSessionInUrl: false },
   cookieOptions: {

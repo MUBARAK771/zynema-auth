@@ -40,9 +40,16 @@
       import { goToApp } from "./js/auth.js";
       const q = new URLSearchParams(location.search),
         h = new URLSearchParams(location.hash.slice(1));
-      const type = q.get("type"),
+      const type = q.get("type") || h.get("type"),
         code = q.get("code"),
-        err = q.get("error_description") || h.get("error_description");
+        tokenHash = q.get("token_hash") || h.get("token_hash"),
+        err =
+          q.get("error_description") ||
+          h.get("error_description") ||
+          q.get("error_code") ||
+          h.get("error_code") ||
+          q.get("error") ||
+          h.get("error");
       function fail(m) {
         document.getElementById("s").classList.add("hidden");
         document.getElementById("bad").classList.remove("hidden");
@@ -59,17 +66,37 @@
             ? "This link has expired. Request a new one."
             : "This link is invalid.",
         );
-      else if (!code) fail();
+      else if (!code && !tokenHash)
+        fail("This link is invalid or has expired. Request a new one.");
       else {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error)
-          fail(
-            /expired/i.test(error.message)
-              ? "This link has expired. Request a new one."
-              : "This link is invalid or was already used.",
-          );
-        else if (type === "recovery") location.replace("reset-password.html");
-        else goToApp();
+        try {
+          const result = code
+            ? await supabase.auth.exchangeCodeForSession(code)
+            : await supabase.auth.verifyOtp({
+                token_hash: tokenHash,
+                type: type === "recovery" ? "recovery" : "email",
+              });
+          if (result.error) {
+            fail(
+              /expired/i.test(result.error.message)
+                ? "This link has expired. Request a new one."
+                : "This link is invalid or was already used.",
+            );
+          } else if (!result.data?.session || !result.data?.user) {
+            fail("This link did not create a valid session. Request a new one.");
+          } else if (type === "recovery") {
+            location.replace("reset-password.html");
+          } else if (
+            (type === "signup" || type === "email") &&
+            result.data.user.email_confirmed_at
+          ) {
+            goToApp();
+          } else {
+            fail("Your email could not be verified. Request a new confirmation link.");
+          }
+        } catch {
+          fail("We couldn't verify this link right now. Please try again.");
+        }
       }
     </script>
   </body>

@@ -9,7 +9,13 @@ export function safeRedirect(url) {
 export const nextParam = () => safeRedirect(new URLSearchParams(location.search).get('next') || CONFIG.APP_URL);
 export const goToApp = next => location.replace(safeRedirect(next || CONFIG.APP_URL));
 
-const cb = type => `${CONFIG.AUTH_URL}/callback.html?type=${type}`;
+const LOCAL_AUTH_HOSTS = new Set(['localhost', '127.0.0.1']);
+const cb = type => {
+  const origin = LOCAL_AUTH_HOSTS.has(location.hostname) ? location.origin : CONFIG.AUTH_URL;
+  const callback = new URL('/callback.html', origin);
+  callback.searchParams.set('type', type);
+  return callback.href;
+};
 
 export async function signUp({ fullName, email, password }) {
   const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName }, emailRedirectTo: cb('signup') } });
