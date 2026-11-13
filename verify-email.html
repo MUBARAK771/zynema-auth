@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Verify your email – Zynema</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="zynema-logo.png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="auth">
+      <aside class="art">
+        <a class="brand" href="index.html">Zyn<i>e</i>ma</a>
+        <h2>Your digital cinema.</h2>
+        <p>
+          Discover films, build your watchlist and pick up where you left off on
+          any screen.
+        </p>
+      </aside>
+      <main class="pane">
+        <div class="form state">
+          <div class="ico">✉️</div>
+          <h1>Check your inbox</h1>
+          <p class="sub">
+            We sent a verification link to <strong id="em">your email</strong>.
+            Open it to activate your account. You can't use Zynema until it's
+            verified.
+          </p>
+          <button class="btn btn-primary" id="resend">Resend email</button>
+          <p class="alt"><a href="login.html">Back to sign in</a></p>
+        </div>
+      </main>
+    </div>
+    <script type="module">
+      import { resendVerification } from "./js/auth.js";
+      import { friendlyError } from "./js/validation.js";
+      import { toast, setLoading } from "./js/ui.js";
+      const email = sessionStorage.getItem("zy_email");
+      const b = document.getElementById("resend");
+      if (email) document.getElementById("em").textContent = email;
+      let t = 0;
+      function cool() {
+        t = 60;
+        b.disabled = true;
+        const i = setInterval(() => {
+          b.textContent = --t > 0 ? "Resend in " + t + "s" : "Resend email";
+          if (t <= 0) {
+            clearInterval(i);
+            b.disabled = false;
+          }
+        }, 1000);
+      }
+      b.addEventListener("click", async () => {
+        if (!email) {
+          location.href = "signup.html";
+          return;
+        }
+        setLoading(b, true, "Sending");
+        try {
+          await resendVerification(email);
+          toast("Verification email sent.", "success");
+        } catch (e) {
+          toast(friendlyError(e), "error");
+        }
+        b.textContent = "Resend email";
+        cool();
+      });
+    </script>
+  </body>
+</html>

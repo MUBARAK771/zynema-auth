@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Verifying… – Zynema</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="zynema-logo.png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="auth">
+      <aside class="art">
+        <a class="brand" href="index.html">Zyn<i>e</i>ma</a>
+        <h2>Your digital cinema.</h2>
+        <p>
+          Discover films, build your watchlist and pick up where you left off on
+          any screen.
+        </p>
+      </aside>
+      <main class="pane">
+        <div class="form state" id="s">
+          <div
+            class="spin"
+            style="margin: 0 auto 1rem; width: 32px; height: 32px"
+          ></div>
+          <h1>One moment…</h1>
+        </div>
+        <div class="form state hidden" id="bad">
+          <div class="ico">⚠️</div>
+          <h1>Link problem</h1>
+          <p class="sub" id="why">This link is invalid or has expired.</p>
+          <a class="btn btn-primary" href="login.html">Back to sign in</a>
+        </div>
+      </main>
+    </div>
+    <script type="module">
+      import { supabase } from "./js/supabase.js";
+      import { goToApp } from "./js/auth.js";
+      const q = new URLSearchParams(location.search),
+        h = new URLSearchParams(location.hash.slice(1));
+      const type = q.get("type"),
+        code = q.get("code"),
+        err = q.get("error_description") || h.get("error_description");
+      function fail(m) {
+        document.getElementById("s").classList.add("hidden");
+        document.getElementById("bad").classList.remove("hidden");
+        if (m) document.getElementById("why").textContent = m;
+      }
+      history.replaceState(
+        null,
+        "",
+        location.pathname + (type ? "?type=" + encodeURIComponent(type) : ""),
+      ); // keep codes/tokens out of visible URL
+      if (err)
+        fail(
+          /expired/i.test(err)
+            ? "This link has expired. Request a new one."
+            : "This link is invalid.",
+        );
+      else if (!code) fail();
+      else {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error)
+          fail(
+            /expired/i.test(error.message)
+              ? "This link has expired. Request a new one."
+              : "This link is invalid or was already used.",
+          );
+        else if (type === "recovery") location.replace("reset-password.html");
+        else goToApp();
+      }
+    </script>
+  </body>
+</html>

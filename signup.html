@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Create account – Zynema</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="zynema-logo.png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="auth">
+      <aside class="art">
+        <a class="brand" href="index.html">Zyn<i>e</i>ma</a>
+        <h2>Your digital cinema.</h2>
+        <p>
+          Discover films, build your watchlist and pick up where you left off on
+          any screen.
+        </p>
+      </aside>
+      <main class="pane">
+        <form class="form" id="f" novalidate>
+          <h1>Create your account</h1>
+          <p class="sub">Join Zynema for free.</p>
+          <div class="field">
+            <label for="name">Full name</label>
+            <div class="inp">
+              <input id="name" autocomplete="name" required />
+            </div>
+            <div class="err" id="name-err"></div>
+          </div>
+          <div class="field">
+            <label for="email">Email address</label>
+            <div class="inp">
+              <input id="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="err" id="email-err"></div>
+          </div>
+          <div class="field">
+            <label for="pw">Password</label>
+            <div class="inp">
+              <input
+                id="pw"
+                type="password"
+                autocomplete="new-password"
+                required
+              /><button
+                type="button"
+                class="eye"
+                data-eye="pw"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="meter" id="meter">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="meter-l" id="meter-l"></div>
+            <div class="err" id="pw-err"></div>
+          </div>
+          <div class="field">
+            <label for="pw2">Confirm password</label>
+            <div class="inp">
+              <input
+                id="pw2"
+                type="password"
+                autocomplete="new-password"
+                required
+              /><button
+                type="button"
+                class="eye"
+                data-eye="pw2"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="err" id="pw2-err"></div>
+          </div>
+          <label class="chk"
+            ><input type="checkbox" id="terms" /><span
+              >I agree to the
+              <a
+                data-app-path="/terms"
+                href="#"
+                target="_blank"
+                rel="noopener"
+                style="color: var(--accent)"
+                >Terms</a
+              >
+              and
+              <a
+                data-app-path="/privacy"
+                href="#"
+                target="_blank"
+                rel="noopener"
+                style="color: var(--accent)"
+                >Privacy Policy</a
+              >.</span
+            ></label
+          >
+          <div class="err" id="terms-err"></div>
+          <button class="btn btn-primary" id="go" type="submit">
+            Create account
+          </button>
+          <p class="alt">Already a member? <a href="login.html">Sign in</a></p>
+        </form>
+      </main>
+    </div>
+    <script type="module">
+      import { signUp } from "./js/auth.js";
+      import {
+        isEmail,
+        isName,
+        passwordScore,
+        friendlyError,
+      } from "./js/validation.js";
+      import {
+        toast,
+        setLoading,
+        fieldError,
+        wireEyeToggles,
+        wireAppLinks,
+        loadMovieArtwork,
+      } from "./js/ui.js";
+      wireEyeToggles();
+      wireAppLinks();
+      loadMovieArtwork();
+      const $ = (id) => document.getElementById(id);
+      let busy = false;
+      $("pw").addEventListener("input", (e) => {
+        const s = passwordScore(e.target.value);
+        [...$("meter").children].forEach(
+          (b, i) =>
+            (b.style.background =
+              i < s.score
+                ? s.score < 3
+                  ? "#ff6b6b"
+                  : s.score < 4
+                    ? "#ffb020"
+                    : "#3ecf8e"
+                : ""),
+        );
+        $("meter-l").textContent = e.target.value ? s.label : "";
+      });
+      $("f").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (busy) return;
+        const name = $("name"),
+          email = $("email"),
+          pw = $("pw"),
+          pw2 = $("pw2");
+        let ok = true;
+        const chk = (el, bad, msg) => {
+          fieldError(el, bad ? msg : "");
+          if (bad) ok = false;
+        };
+        chk(name, !isName(name.value), "Enter your full name.");
+        chk(email, !isEmail(email.value), "Enter a valid email address.");
+        chk(
+          pw,
+          !passwordScore(pw.value).ok,
+          "Use 8+ characters with upper, lower case and a number.",
+        );
+        chk(pw2, pw.value !== pw2.value, "Passwords do not match.");
+        $("terms-err").textContent = $("terms").checked
+          ? ""
+          : "Accept the terms to continue.";
+        if (!$("terms").checked) ok = false;
+        if (!ok) return;
+        busy = true;
+        setLoading($("go"), true, "Creating account");
+        try {
+          await signUp({
+            fullName: name.value.trim(),
+            email: email.value.trim(),
+            password: pw.value,
+          });
+          sessionStorage.setItem("zy_email", email.value.trim());
+          location.href = "verify-email.html";
+        } catch (err) {
+          toast(friendlyError(err), "error");
+          busy = false;
+          setLoading($("go"), false);
+        }
+      });
+    </script>
+  </body>
+</html>

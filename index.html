@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Zynema </title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="zynema-logo.png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <meta
+      name="description"
+      content="Zynema is your digital cinema and movie discovery platform."
+    />
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="index.html">Zyn<i>e</i>ma</a>
+        <button id="menu-btn" aria-expanded="false" aria-controls="nav">
+          Menu
+        </button>
+        <nav id="nav">
+          <a href="#showcase">Showcase</a><a href="#cinemas">In Cinemas</a
+          ><a href="#benefits">Benefits</a><a href="#plans">Plans</a
+          ><a class="btn" href="login.html">Sign In</a
+          ><a class="btn btn-primary" href="signup.html">Get Started</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <div class="hero">
+        <div class="wrap">
+          <h1>Your Next Movie Experience Starts Here.</h1>
+          <p>
+            Zynema brings film discovery, personal watchlists and curated picks
+            into one place. Create a free account in under a minute.
+          </p>
+          <div class="cta">
+            <a class="btn btn-primary" href="signup.html">Get Started</a
+            ><a class="btn" href="login.html">Sign In</a>
+          </div>
+          <div class="posters" id="showcase">
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+          </div>
+          <div class="posters" id="showcase">
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+            <div class="poster" role="img" aria-label="Featured poster"></div>
+          </div>
+          
+        </div>
+      </div>
+      <section id="cinemas" class="cinema-feature">
+        <div class="wrap">
+          <div class="cinema-feature-content">
+            <p class="cinema-feature-label">The big screen, in view</p>
+            <h2>Movies coming to cinemas</h2>
+            <p class="cinema-feature-copy">
+              Zynema also features movies set to arrive in cinemas, so you can
+              discover upcoming theatrical releases and see what's coming to
+              the big screen.
+            </p>
+          </div>
+          <svg
+            class="cinema-feature-art"
+            viewBox="0 0 560 360"
+            role="img"
+            aria-labelledby="cinema-art-title"
+          >
+            <title id="cinema-art-title">Illustration of a cinema marquee</title>
+            <defs>
+              <linearGradient id="marquee" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#ff7a36" />
+                <stop offset="1" stop-color="#e5171f" />
+              </linearGradient>
+            </defs>
+            <rect
+              x="8"
+              y="8"
+              width="544"
+              height="344"
+              rx="24"
+              fill="#151517"
+              stroke="#2a2a2e"
+              stroke-width="2"
+            />
+            <path d="M90 318V153h380v165" fill="#222225" />
+            <path
+              d="M74 151 105 85h350l31 66H74Z"
+              fill="url(#marquee)"
+            />
+            <path d="M144 86v65m68-65v65m68-65v65m68-65v65m68-65v65" stroke="#151517" stroke-width="5" opacity=".65" />
+            <rect
+              x="98"
+              y="164"
+              width="364"
+              height="94"
+              rx="12"
+              fill="#09090a"
+              stroke="#ff5a1f"
+              stroke-width="3"
+            />
+            <text
+              x="280"
+              y="222"
+              fill="#f5f2ee"
+              font-family="system-ui, sans-serif"
+              font-size="38"
+              font-weight="800"
+              letter-spacing="7"
+              text-anchor="middle"
+            >
+              CINEMA
+            </text>
+            <rect x="119" y="277" width="92" height="75" rx="8" fill="#09090a" />
+            <rect x="224" y="277" width="112" height="75" rx="8" fill="#09090a" />
+            <rect x="349" y="277" width="92" height="75" rx="8" fill="#09090a" />
+            <circle cx="280" cy="279" r="7" fill="#ff9a3c" />
+          </svg>
+        </div>
+      </section>
+      <section id="benefits">
+        <div class="wrap">
+          <h2>Why join Zynema</h2>
+          <div class="grid3">
+            <div class="card">
+              <h3>Discover faster</h3>
+              <p>
+                Browse trending and new releases, and find something worth
+                watching tonight.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Keep your place</h3>
+              <p>
+                One account across every device, so your list and progress
+                follow you.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Sign in once</h3>
+              <p>
+                Your Zynema login works in the movie app automatically. No
+                second sign-in.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="plans">
+        <div class="wrap">
+          <h2>Free and Premium</h2>
+          <div class="grid3">
+            <div class="card">
+              <h3>Free</h3>
+              <ul>
+                <li>Browse and search movies</li>
+                <li>Personal watchlist</li>
+                <li>Standard recommendations</li>
+              </ul>
+            </div>
+            <div class="card premium">
+              <h3>Premium</h3>
+              <ul>
+                <li>Everything in Free</li>
+                <li>Ad-free experience</li>
+                <li>Early access to new features</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="wrap">
+        <span>© <span id="yr"></span> Zynema</span>
+        <nav>
+          <a href="#benefits">About</a
+          ><a href="mailto:support@zynema.com">Contact</a
+          ><a data-app-path="/privacy" href="#">Privacy Policy</a
+          ><a data-app-path="/terms" href="#">Terms</a>
+        </nav>
+      </div>
+    </footer>
+    <script type="module">
+      import { wireNav, wireAppLinks, loadMovieArtwork } from "./js/ui.js";
+      wireNav();
+      wireAppLinks();
+      loadMovieArtwork();
+      document.getElementById("yr").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Sign in – Zynema</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="zynema-logo.png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="auth">
+      <aside class="art">
+        <a class="brand" href="index.html">Zyn<i>e</i>ma</a>
+        <h2>Your digital cinema.</h2>
+        <p>
+          Discover films, build your watchlist and pick up where you left off on
+          any screen.
+        </p>
+      </aside>
+      <main class="pane">
+        <form class="form" id="f" novalidate>
+          <h1>Welcome back</h1>
+          <p class="sub">Sign in to continue to Zynema.</p>
+          <div class="field">
+            <label for="email">Email address</label>
+            <div class="inp">
+              <input id="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="err" id="email-err"></div>
+          </div>
+          <div class="field">
+            <label for="pw">Password</label>
+            <div class="inp">
+              <input
+                id="pw"
+                type="password"
+                autocomplete="current-password"
+                required
+              /><button
+                type="button"
+                class="eye"
+                data-eye="pw"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="err" id="pw-err"></div>
+          </div>
+          <div class="row">
+            <label class="chk"
+              ><input type="checkbox" id="rem" /><span
+                >Remember my email</span
+              ></label
+            ><a href="forgot-password.html">Forgot password?</a>
+          </div>
+          <button class="btn btn-primary" id="go" type="submit">Sign in</button>
+          <p class="alt">
+            New to Zynema? <a href="signup.html">Create an account</a>
+          </p>
+        </form>
+      </main>
+    </div>
+    <script type="module">
+      import { signIn, getUser, goToApp, nextParam } from "./js/auth.js";
+      import { isEmail, friendlyError } from "./js/validation.js";
+      import {
+        toast,
+        setLoading,
+        fieldError,
+        wireEyeToggles,
+        loadMovieArtwork,
+      } from "./js/ui.js";
+      wireEyeToggles();
+      loadMovieArtwork();
+      const $ = (id) => document.getElementById(id);
+      let busy = false;
+      const saved = localStorage.getItem("zy_remember");
+      if (saved) {
+        $("email").value = saved;
+        $("rem").checked = true;
+      }
+      getUser().then((u) => {
+        if (u?.email_confirmed_at) goToApp(nextParam());
+      });
+      $("f").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (busy) return;
+        const em = $("email"),
+          pw = $("pw");
+        fieldError(em, isEmail(em.value) ? "" : "Enter a valid email address.");
+        fieldError(pw, pw.value ? "" : "Enter your password.");
+        if (!isEmail(em.value) || !pw.value) return;
+        busy = true;
+        setLoading($("go"), true, "Signing in");
+        try {
+          await signIn({ email: em.value.trim(), password: pw.value });
+          $("rem").checked
+            ? localStorage.setItem("zy_remember", em.value.trim())
+            : localStorage.removeItem("zy_remember");
+          goToApp(nextParam());
+        } catch (err) {
+          if (/confirm/i.test(err.message)) {
+            sessionStorage.setItem("zy_email", em.value.trim());
+            toast(friendlyError(err), "error");
+            setTimeout(() => (location.href = "verify-email.html"), 1800);
+          } else toast(friendlyError(err), "error");
+          busy = false;
+          setLoading($("go"), false);
+        }
+      });
+    </script>
+  </body>
+</html>

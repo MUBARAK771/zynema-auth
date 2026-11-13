@@ -1,0 +1,208 @@
+.auth {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    min-height: 100vh
+}
+
+.art {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 3rem;
+    background-image: linear-gradient(180deg, #09090a44 0%, #09090a66 40%, #09090af2 100%), radial-gradient(700px 500px at 30% 20%, #ff5a1f66, transparent), var(--auth-art, linear-gradient(160deg, #2a0a0d, #09090a));
+    background-position: center;
+    background-size: cover;
+    border-right: 1px solid var(--line)
+}
+
+.art h2 {
+    font-size: clamp(2rem, 3.4vw, 3.2rem);
+    max-width: 12ch
+}
+
+.art p {
+    color: var(--mute);
+    margin-top: 1rem;
+    max-width: 36ch
+}
+
+.art .brand {
+    position: absolute;
+    top: 2rem;
+    left: 3rem
+}
+
+.pane {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem
+}
+
+.form {
+    width: min(420px, 100%)
+}
+
+.form h1 {
+    font-size: 2.2rem;
+    margin-bottom: .4rem
+}
+
+.form .sub {
+    color: var(--mute);
+    margin-bottom: 1.8rem
+}
+
+.field {
+    margin-bottom: 1.1rem
+}
+
+.field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: .4rem;
+    font-size: .95rem
+}
+
+.inp {
+    position: relative
+}
+
+.inp input {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 1rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem
+}
+
+.inp input:focus {
+    border-color: var(--accent);
+    outline: 0;
+    box-shadow: 0 0 0 3px #ff5a1f33
+}
+
+.inp input[aria-invalid=true] {
+    border-color: var(--bad)
+}
+
+.inp .eye {
+    position: absolute;
+    right: 6px;
+    top: 5px;
+    min-height: 40px;
+    padding: 0 .8rem;
+    background: 0;
+    border: 0;
+    color: var(--mute);
+    font: 600 .85rem 'Figtree';
+    cursor: pointer
+}
+
+.err {
+    color: var(--bad);
+    font-size: .85rem;
+    min-height: 1.1rem;
+    margin-top: .25rem
+}
+
+.meter {
+    display: flex;
+    gap: 4px;
+    margin-top: .5rem
+}
+
+.meter span {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    transition: background .2s
+}
+
+.meter-l {
+    font-size: .8rem;
+    color: var(--mute);
+    margin-top: .3rem
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.3rem;
+    font-size: .92rem;
+    flex-wrap: wrap
+}
+
+.chk {
+    display: flex;
+    gap: .6rem;
+    align-items: flex-start;
+    color: var(--mute);
+    font-size: .92rem
+}
+
+.chk input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent);
+    margin-top: 2px
+}
+
+.form .btn-primary {
+    width: 100%
+}
+
+.alt {
+    text-align: center;
+    color: var(--mute);
+    margin-top: 1.4rem
+}
+
+.alt a, .row a {
+    color: var(--accent)
+}
+
+.state {
+    text-align: center
+}
+
+.state .ico {
+    font-size: 3rem;
+    margin-bottom: 1rem
+}
+
+.avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font: 800 2rem 'Bricolage Grotesque';
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    margin-bottom: 1rem
+}
+
+dl.meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .6rem 1.2rem;
+    margin: 1.2rem 0 1.8rem;
+    color: var(--mute)
+}
+
+dl.meta dd {
+    color: var(--text);
+    word-break: break-word
+}
+
+.hidden {
+    display: none !important
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Profile – Zynema</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/png" href="zynema-logo.png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="auth">
+      <aside class="art">
+        <a class="brand" href="index.html">Zyn<i>e</i>ma</a>
+        <h2>Your digital cinema.</h2>
+        <p>
+          Discover films, build your watchlist and pick up where you left off on
+          any screen.
+        </p>
+      </aside>
+      <main class="pane">
+        <div class="form">
+          <div class="avatar" id="av">Z</div>
+          <h1 id="nm">Your profile</h1>
+          <dl class="meta">
+            <dt>Email</dt>
+            <dd id="em"></dd>
+            <dt>Member since</dt>
+            <dd id="since"></dd>
+          </dl>
+          <form id="f" novalidate>
+            <div class="field">
+              <label for="name">Full name</label>
+              <div class="inp"><input id="name" autocomplete="name" /></div>
+              <div class="err" id="name-err"></div>
+            </div>
+            <button class="btn btn-primary" id="go" type="submit">
+              Save changes
+            </button>
+          </form>
+          <p class="alt">
+            <a id="app" href="#">Open Zynema</a> ·
+            <a href="#" id="out">Log out</a>
+          </p>
+        </div>
+      </main>
+    </div>
+    <script type="module">
+      import { requireUser, updateName, logout } from "./js/auth.js";
+      import { isName, friendlyError } from "./js/validation.js";
+      import { toast, setLoading, fieldError } from "./js/ui.js";
+      import { CONFIG } from "./js/config.js";
+      const $ = (id) => document.getElementById(id);
+      const u = await requireUser();
+      function paint(u) {
+        const n = u.user_metadata?.full_name || "";
+        $("nm").textContent = n || "Your profile";
+        $("name").value = n;
+        $("em").textContent = u.email;
+        $("since").textContent = new Date(u.created_at).toLocaleDateString(
+          undefined,
+          { dateStyle: "long" },
+        );
+        $("av").textContent = (n || u.email)[0].toUpperCase();
+      }
+      if (u) {
+        paint(u);
+        $("app").href = CONFIG.APP_URL;
+      }
+      $("f").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const n = $("name");
+        fieldError(n, isName(n.value) ? "" : "Enter your full name.");
+        if (!isName(n.value)) return;
+        setLoading($("go"), true, "Saving");
+        try {
+          paint(await updateName(n.value.trim()));
+          toast("Profile saved.", "success");
+        } catch (err) {
+          toast(friendlyError(err), "error");
+        }
+        setLoading($("go"), false);
+      });
+      $("out").addEventListener("click", (e) => {
+        e.preventDefault();
+        logout();
+      });
+    </script>
+  </body>
+</html>
