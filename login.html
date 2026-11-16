@@ -72,142 +72,170 @@
     </div>
 
     <script type="module">
-      import { supabase } from "./js/supabase.js";
-      import { signIn, getUser, nextParam } from "./js/auth.js";
-      import { isEmail, friendlyError } from "./js/validation.js";
-      import {
-        toast,
-        setLoading,
-        fieldError,
-        wireEyeToggles,
-        loadMovieArtwork,
-      } from "./js/ui.js";
+  import { supabase } from "./js/supabase.js";
+  import { signIn, getUser, nextParam } from "./js/auth.js";
+  import { isEmail, friendlyError } from "./js/validation.js";
+  import {
+    toast,
+    setLoading,
+    fieldError,
+    wireEyeToggles,
+    loadMovieArtwork,
+  } from "./js/ui.js";
 
-      wireEyeToggles();
-      loadMovieArtwork();
+  wireEyeToggles();
+  loadMovieArtwork();
 
-      const $ = (id) => document.getElementById(id);
-      const DASHBOARD_HANDOFF_ENDPOINT = "/api/auth/handoff/start";
-      let busy = false;
+  const $ = (id) => document.getElementById(id);
+  const DASHBOARD_ORIGIN = "https://zynema-snowy.vercel.app";
+  const HANDOFF_ENDPOINT = `${DASHBOARD_ORIGIN}/api/auth/handoff`;
+  const logoutRequested =
+    new URLSearchParams(window.location.search).get("logout") === "1";
+  let busy = false;
 
-      const saved = localStorage.getItem("zy_remember");
-      if (saved) {
-        $("email").value = saved;
-        $("rem").checked = true;
+  const saved = localStorage.getItem("zy_remember");
+  if (saved) {
+    $("email").value = saved;
+    $("rem").checked = true;
+  }
+
+  function safeDashboardPath(value) {
+    try {
+      const destination = new URL(value || "/", DASHBOARD_ORIGIN);
+      if (destination.origin !== DASHBOARD_ORIGIN) return "/";
+      return `${destination.pathname}${destination.search}${destination.hash}`;
+    } catch {
+      return "/";
+    }
+  }
+
+  function handoffToDashboard(session, requestedNext) {
+    if (
+      !session?.access_token ||
+      !session?.refresh_token ||
+      !session?.user?.id
+    ) {
+      throw new Error("Your login session could not be verified. Please sign in again.");
+    }
+
+    const expiresAt = Number(
+      session.expires_at ??
+        Math.floor(Date.now() / 1000) + Number(session.expires_in || 3600)
+    );
+
+    if (!Number.isFinite(expiresAt) || expiresAt <= Math.floor(Date.now() / 1000)) {
+      throw new Error("Your login session has expired. Please sign in again.");
+    }
+
+    const values = {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+      expires_at: String(expiresAt),
+      user_id: session.user.id,
+      next: safeDashboardPath(requestedNext),
+    };
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = HANDOFF_ENDPOINT;
+    form.enctype = "application/x-www-form-urlencoded";
+    form.hidden = true;
+
+    for (const [name, value] of Object.entries(values)) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  if (logoutRequested) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast("You have been signed out.", "success");
+    } catch (error) {
+      toast(friendlyError(error), "error");
+    }
+
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.hash}`
+    );
+  } else {
+    try {
+      const existingUser = await getUser();
+      if (existingUser?.email_confirmed_at) {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (data.session) {
+          handoffToDashboard(data.session, nextParam());
+        }
+      }
+    } catch (error) {
+      console.error("Existing-session handoff failed:", error);
+      toast(friendlyError(error), "error");
+    }
+  }
+
+  $("f").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy) return;
+
+    const emailInput = $("email");
+    const passwordInput = $("pw");
+
+    fieldError(
+      emailInput,
+      isEmail(emailInput.value) ? "" : "Enter a valid email address."
+    );
+    fieldError(
+      passwordInput,
+      passwordInput.value ? "" : "Enter your password."
+    );
+
+    if (!isEmail(emailInput.value) || !passwordInput.value) return;
+
+    busy = true;
+    setLoading($("go"), true, "Signing in");
+
+    try {
+      const data = await signIn({
+        email: emailInput.value.trim(),
+        password: passwordInput.value,
+      });
+
+      if (!data.session) {
+        throw new Error("Sign-in succeeded but no session was returned. Please try again.");
       }
 
-      /*
-       * This endpoint must be implemented as a Vercel serverless function
-       * in the HTML project. It must validate the Supabase access token,
-       * create a short-lived, single-use handoff ticket, and return:
-       * { "redirectUrl": "https://zynema-snowy.vercel.app/..." }
-       *
-       * Do not put Supabase tokens in the redirect URL. The dashboard must
-       * redeem the one-time ticket server-side and set its own HttpOnly cookie.
-       */
-      async function handoffToDashboard(session, requestedNext) {
-        if (!session?.access_token) {
-          throw new Error("Your login session could not be verified. Please sign in again.");
-        }
-
-        const response = await fetch(DASHBOARD_HANDOFF_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "same-origin",
-          cache: "no-store",
-          body: JSON.stringify({
-            access_token: session.access_token,
-            refresh_token: session.refresh_token,
-            expires_at: session.expires_at,
-            next: requestedNext,
-          }),
-        });
-
-        const result = await response.json().catch(() => ({}));
-
-        if (!response.ok || typeof result.redirectUrl !== "string") {
-          throw new Error(
-            result.error || "We couldn't securely connect you to the Zynema dashboard."
-          );
-        }
-
-        const destination = new URL(result.redirectUrl);
-        if (destination.origin !== "https://zynema-snowy.vercel.app") {
-          throw new Error("The dashboard returned an unapproved destination.");
-        }
-
-        window.location.replace(destination.href);
+      if ($("rem").checked) {
+        localStorage.setItem("zy_remember", emailInput.value.trim());
+      } else {
+        localStorage.removeItem("zy_remember");
       }
 
-      // If the user already has a valid HTML-site session, start the same
-      // handoff instead of merely redirecting to the other Vercel domain.
-      try {
-        const existingUser = await getUser();
-        if (existingUser?.email_confirmed_at) {
-          const { data, error } = await supabase.auth.getSession();
-          if (error) throw error;
-          if (data.session) {
-            await handoffToDashboard(data.session, nextParam());
-          }
-        }
-      } catch (error) {
-        console.error("Existing-session handoff:", error);
+      handoffToDashboard(data.session, nextParam());
+    } catch (error) {
+      if (/confirm/i.test(error?.message ?? "")) {
+        sessionStorage.setItem("zy_email", emailInput.value.trim());
+        toast(friendlyError(error), "error");
+        setTimeout(() => {
+          window.location.href = "verify-email.html";
+        }, 1800);
+      } else {
         toast(friendlyError(error), "error");
       }
 
-      $("f").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        if (busy) return;
-
-        const emailInput = $("email");
-        const passwordInput = $("pw");
-
-        fieldError(
-          emailInput,
-          isEmail(emailInput.value) ? "" : "Enter a valid email address."
-        );
-        fieldError(
-          passwordInput,
-          passwordInput.value ? "" : "Enter your password."
-        );
-
-        if (!isEmail(emailInput.value) || !passwordInput.value) return;
-
-        busy = true;
-        setLoading($("go"), true, "Signing in");
-
-        try {
-          const data = await signIn({
-            email: emailInput.value.trim(),
-            password: passwordInput.value,
-          });
-
-          if (!data.session) {
-            throw new Error("Sign-in succeeded but no session was returned. Please try again.");
-          }
-
-          if ($("rem").checked) {
-            localStorage.setItem("zy_remember", emailInput.value.trim());
-          } else {
-            localStorage.removeItem("zy_remember");
-          }
-
-          await handoffToDashboard(data.session, nextParam());
-        } catch (error) {
-          if (/confirm/i.test(error.message)) {
-            sessionStorage.setItem("zy_email", emailInput.value.trim());
-            toast(friendlyError(error), "error");
-            setTimeout(() => {
-              window.location.href = "verify-email.html";
-            }, 1800);
-          } else {
-            toast(friendlyError(error), "error");
-          }
-
-          busy = false;
-          setLoading($("go"), false);
-        }
-      });
-    </script>
+      busy = false;
+      setLoading($("go"), false);
+    }
+  });
+</script>
   </body>
 </html>
