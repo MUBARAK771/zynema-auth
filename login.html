@@ -87,7 +87,7 @@
   loadMovieArtwork();
 
   const $ = (id) => document.getElementById(id);
-  const DASHBOARD_ORIGIN = "https://app.zynema-snowy.online";
+  const DASHBOARD_ORIGIN = "https://app.zynema-snowy.online/login.html";
   const HANDOFF_ENDPOINT = `${DASHBOARD_ORIGIN}/api/auth/handoff`;
   const logoutRequested =
     new URLSearchParams(window.location.search).get("logout") === "1";
