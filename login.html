@@ -98,7 +98,6 @@ const HANDOFF_ENDPOINT = `${DASHBOARD_ORIGIN}/api/auth/handoff`;
     $("email").value = saved;
     $("rem").checked = true;
   }
-
   function safeDashboardPath(value) {
     try {
       const destination = new URL(value || "/", DASHBOARD_ORIGIN);

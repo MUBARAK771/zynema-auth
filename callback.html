@@ -37,7 +37,7 @@
     </div>
     <script type="module">
       import { supabase } from "./js/supabase.js";
-      import { goToApp } from "./js/auth.js";
+      import { CONFIG } from "./js/config.js";
       const q = new URLSearchParams(location.search),
         h = new URLSearchParams(location.hash.slice(1));
       const type = q.get("type") || h.get("type"),
@@ -90,7 +90,20 @@
             (type === "signup" || type === "email") &&
             result.data.user.email_confirmed_at
           ) {
-            goToApp();
+            try {
+              const { error } = await supabase.auth.signOut();
+              if (error) {
+                fail(
+                  "Your email was confirmed, but we couldn't clear the temporary session. Please return to sign in and try again.",
+                );
+              } else {
+                location.replace(CONFIG.LOGIN_URL);
+              }
+            } catch {
+              fail(
+                "Your email was confirmed, but we couldn't clear the temporary session. Please return to sign in and try again.",
+              );
+            }
           } else {
             fail("Your email could not be verified. Request a new confirmation link.");
           }
