@@ -67,7 +67,9 @@
             : "This link is invalid.",
         );
       else if (!code && !tokenHash)
-        fail("This link is invalid or has expired. Request a new one.");
+        fail(
+          "This confirmation link is incomplete. Request a new email and open its full confirmation link. If this keeps happening, contact support.",
+        );
       else {
         try {
           const result = code
