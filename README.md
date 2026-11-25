@@ -6,7 +6,7 @@ Static site (HTML/CSS/vanilla JS) on Supabase Auth with PKCE. No build step.
 1. Authentication → Providers → Email: enable, turn **Confirm email** ON.
 2. Authentication → URL Configuration:
    - Site URL: `https://www.zynema-app.online`.
-   - Redirect URLs: add `https://www.zynema-app.online/callback.html`, `http://127.0.0.1:5500/callback.html`, and `http://localhost:5500/callback.html`. Add `http://localhost:3000/callback.html` only if that is also a local development URL you use.
+   - Redirect URLs: add `https://www.zynema-app.online/callback.html?type=signup` and `https://www.zynema-app.online/callback.html?type=recovery`, plus `http://127.0.0.1:5500/callback.html`, and `http://localhost:5500/callback.html`. Add `http://localhost:3000/callback.html` only if that is also a local development URL you use.
    - Add `https://zynema-snowy.vercel.app/auth/callback` only if the Watch app implements that callback itself.
 3. Authentication → Email Templates → Confirm signup: use Supabase's confirmation URL, which honors the `emailRedirectTo` callback sent by the signup code:
    ```html
